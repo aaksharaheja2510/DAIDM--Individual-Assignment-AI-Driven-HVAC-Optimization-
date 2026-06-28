@@ -326,13 +326,14 @@ elif page == "⚡ Energy Problem Landscape":
         fig, ax = plt.subplots(figsize=(6, 4))
         segs = dff["segment"].unique()
         data_bp = [dff[dff["segment"]==s]["monthly_bill_aed"].values/1000 for s in segs]
-        bp = ax.boxplot(data_bp, patch_artist=True, labels=[s.replace(" ","\n") for s in segs],
+        bp = ax.boxplot(data_bp, patch_artist=True,
                         medianprops=dict(color=CORAL, lw=2))
+        ax.set_xticks(range(1, len(segs)+1))
+        ax.set_xticklabels([s.replace(" ","\n") for s in segs], fontsize=8)
         for patch, color in zip(bp["boxes"], SEG_COLORS):
             patch.set_facecolor(color); patch.set_alpha(0.7)
         ax.set_ylabel("Monthly Bill (AED '000)")
         ax.set_title("Tech-Forward Operators carry the highest energy burden", fontweight="bold", color=NAVY)
-        plt.xticks(fontsize=8)
         st.pyplot(fig); plt.close()
 
     with col4:
@@ -455,6 +456,17 @@ elif page == "🔵 Cluster Analysis":
     with col1:
         st.markdown('<div class="section-title">Elbow Method — Choosing k</div>', unsafe_allow_html=True)
         inertias = []
+        # Recompute scaled data locally for elbow chart
+        from sklearn.preprocessing import StandardScaler
+        _num_cols = [
+            "realtime_visibility_score","hvac_pct_of_bill","hvac_satisfaction",
+            "stakeholder_pressure","ai_openness","pilot_interest",
+            "feat_dashboard","feat_auto_hvac","feat_occupancy","feat_predictive",
+            "feat_air_quality","feat_carbon","feat_bms_integ","feat_mobile_app","feat_compliance",
+            "monitor_bms","monitor_iot","tech_bms","tech_iot_sensor","tech_smart_meter",
+            "tech_ai_maintenance","pain_high_cost","pain_compliance","pain_no_data"
+        ]
+        X_sc = StandardScaler().fit_transform(df[_num_cols].fillna(df[_num_cols].median()))
         for k in range(2, 10):
             km = KMeans(n_clusters=k, random_state=42, n_init=10)
             km.fit(X_sc)
@@ -580,13 +592,14 @@ elif page == "💰 WTP & Revenue Model":
         fig, ax = plt.subplots(figsize=(6, 4))
         segs = dff["segment"].unique()
         data_bp = [dff[dff["segment"]==s]["wtp_aed_per_building"].values for s in segs]
-        bp = ax.boxplot(data_bp, patch_artist=True, labels=[s.replace(" ","\n") for s in segs],
+        bp = ax.boxplot(data_bp, patch_artist=True,
                         medianprops=dict(color=CORAL, lw=2.5))
+        ax.set_xticks(range(1, len(segs)+1))
+        ax.set_xticklabels([s.replace(" ","\n") for s in segs], fontsize=7.5)
         for patch, color in zip(bp["boxes"], SEG_COLORS):
             patch.set_facecolor(color); patch.set_alpha(0.7)
         ax.set_ylabel("WTP (AED/month/building)")
         ax.set_title("Huge WTP spread — one price point won't work", fontweight="bold", color=NAVY)
-        plt.xticks(fontsize=7.5)
         st.pyplot(fig); plt.close()
 
     with col2:
